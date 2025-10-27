@@ -1,23 +1,17 @@
 import { authService } from "@/services/authService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { jwtDecode } from 'jwt-decode';
 import { useState } from "react";
 import {
+    ImageBackground,
     KeyboardAvoidingView,
     Platform,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
-
-interface TokenPayload {
-    sub: string;
-    exp?: number;
-    iat?: number;
-}
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -25,120 +19,128 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
-    const validateEmail = (email: string) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
+    const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     const handleLogin = async () => {
         if (!email) return setErrorMessage("Favor inserir email!");
         if (!password) return setErrorMessage("Favor inserir senha!");
         if (!validateEmail(email)) return setErrorMessage("Favor inserir um email válido!");
-
         try {
             const res = await authService.login(email, password);
             if (res) {
-                const tokenPayload = jwtDecode<TokenPayload>(res);
-                const userEmail = tokenPayload.sub;
-
                 await AsyncStorage.setItem('userToken', res);
-                await AsyncStorage.setItem('userEmail', userEmail);
+                await AsyncStorage.setItem('userEmail', email);
                 setErrorMessage("");
                 router.replace('/(tabs)');
             } else {
-                setErrorMessage("Token não recebido. Verifique a API.");
+                setErrorMessage("Token não recebido.");
             }
-
         } catch (error) {
-            console.log("Erro ao logar:", error);
-            setErrorMessage("Não foi possível logar! Tente novamente mais tarde");
+            console.log(error)
+            setErrorMessage("Indisponível! Tente novamente mais tarde.");
         }
     };
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
+        <ImageBackground
+            source={{ uri: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80' }}
+            style={styles.background}
+            resizeMode="cover"
+            blurRadius={3}
         >
-            <View style={styles.inner}>
-                <Text style={styles.title}>Booksy</Text>
-                <Text style={styles.errorText}> {errorMessage}</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="E-mail"
-                    placeholderTextColor="#888"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    value={email}
-                    onChangeText={setEmail}
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder="Senha"
-                    placeholderTextColor="#888"
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                />
-                <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                    <Text style={styles.buttonText}>Entrar</Text>
-                </TouchableOpacity>
-            </View>
-        </KeyboardAvoidingView>
+            <KeyboardAvoidingView
+                style={styles.container}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+            >
+                <View style={styles.card}>
+                    <Text style={styles.title}>Booksy</Text>
+                    <Text style={styles.errorText}>{errorMessage}</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="E-mail"
+                        placeholderTextColor="#a0a0a0"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        value={email}
+                        onChangeText={setEmail}
+                    />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Senha"
+                        placeholderTextColor="#a0a0a0"
+                        secureTextEntry
+                        value={password}
+                        onChangeText={setPassword}
+                    />
+                    <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                        <Text style={styles.buttonText}>Entrar</Text>
+                    </TouchableOpacity>
+                </View>
+            </KeyboardAvoidingView>
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    background: {
         flex: 1,
-        backgroundColor: '#F8FAFC',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    container: {
+        width: '100%',
         paddingHorizontal: 24,
     },
-    inner: {
+    card: {
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        borderRadius: 20,
+        padding: 30,
         width: '100%',
         maxWidth: 360,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 5 },
+        shadowRadius: 15,
+        elevation: 8,
     },
     title: {
-        fontSize: 32,
-        fontWeight: '700',
+        fontSize: 36,
+        fontWeight: '800',
         color: '#1E293B',
-        textAlign: 'center',
-        marginBottom: 15,
+        marginBottom: 10,
+        textShadowColor: 'rgba(0,0,0,0.1)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 4,
     },
     errorText: {
+        color: '#EF4444',
         marginBottom: 15,
-        marginTop: 0,
-        color: '#ff0000',
+        textAlign: 'center',
     },
     input: {
-        backgroundColor: '#FFF',
+        borderColor: '#c7c7c7',
         borderWidth: 1,
-        borderColor: '#CBD5E1',
-        borderRadius: 10,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
+        backgroundColor: '#F1F5F9',
+        borderRadius: 12,
+        paddingVertical: 14,
+        paddingHorizontal: 18,
         fontSize: 16,
         color: '#0F172A',
         marginBottom: 16,
-        shadowColor: '#000',
-        shadowOpacity: 0.05,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        elevation: 2,
+        width: '100%',
     },
     button: {
         backgroundColor: '#3B82F6',
-        paddingVertical: 14,
-        borderRadius: 10,
+        paddingVertical: 16,
+        paddingHorizontal: 40,
+        borderRadius: 12,
         alignItems: 'center',
-        marginTop: 8,
+        width: '100%',
     },
     buttonText: {
         color: '#FFF',
-        fontSize: 16,
-        fontWeight: '600',
+        fontSize: 18,
+        fontWeight: '700',
     },
 });
