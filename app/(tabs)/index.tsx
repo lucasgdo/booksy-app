@@ -40,7 +40,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.greeting}>Bem-vindo, {userName}</Text>
+      <Text style={styles.greeting}>Bem-vindo, {userName?.split(' ')[0]}</Text>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Leituras em progresso:</Text>
