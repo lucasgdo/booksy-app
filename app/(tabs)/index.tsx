@@ -1,98 +1,150 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { userService } from "@/services/userService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [userName, setUserName] = useState<string | null>(null);
+  const [currentReadings, setCurrentReadings] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  useEffect(() => {
+    const loadUserData = async () => {
+      const userEmail = await AsyncStorage.getItem('userEmail')
+      if (!userEmail) {
+        setUserName("Leitor")
+        return
+      }
+      try {
+        const user = await userService.getUserByEmail(userEmail)
+        setUserName(user?.name || "Leitor")
+      } catch (error) {
+        console.error('Failed to load user', error)
+        setUserName("Leitor")
+      }
+    };
+
+    // Mock inicial (substituirá futuramente pela API)
+    setCurrentReadings([
+      { id: "1", title: "O Hobbit", progress: "45%" },
+      { id: "2", title: "1984", progress: "80%" },
+    ]);
+
+    setReviews([
+      { id: "1", book: "A Revolução dos Bichos", rating: 5 },
+      { id: "2", book: "Dom Casmurro", rating: 4 },
+    ]);
+
+    loadUserData();
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.greeting}>Bem-vindo, {userName}</Text>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Leituras em progresso:</Text>
+
+        <FlatList
+          data={currentReadings}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={styles.cardSubtitle}>Progresso: {item.progress}</Text>
+            </View>
+          )}
+        />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Últimas análises:</Text>
+
+        {reviews.length > 0 ? (
+          reviews.map((review) => (
+            <TouchableOpacity key={review.id} style={styles.reviewCard}>
+              <Text style={styles.reviewTitle}>{review.book}</Text>
+              <Text style={styles.reviewSubtitle}>⭐ {review.rating}/5</Text>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>Nenhuma review ainda</Text>
+        )}
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+    paddingHorizontal: 20,
+    paddingTop: 60,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  greeting: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#1E293B",
+    marginBottom: 24,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  section: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#334155",
+    marginBottom: 12,
+  },
+  card: {
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderRadius: 12,
+    marginRight: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
+    width: 160,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1E293B",
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: "#64748B",
+    marginTop: 4,
+  },
+  reviewCard: {
+    backgroundColor: "#FFF",
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  reviewTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1E293B",
+  },
+  reviewSubtitle: {
+    fontSize: 14,
+    color: "#475569",
+    marginTop: 4,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#94A3B8",
+    fontStyle: "italic",
   },
 });
