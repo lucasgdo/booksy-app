@@ -7,23 +7,24 @@ export default function HomeScreen() {
   const [userName, setUserName] = useState<string | null>(null);
   const [currentReadings, setCurrentReadings] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const loadUserData = async () => {
-      const userEmail = await AsyncStorage.getItem('userEmail')
-      if (!userEmail) {
-        setUserName("Leitor")
-        return
-      }
-      try {
-        const user = await userService.getUserByEmail(userEmail)
-        setUserName(user?.name || "Leitor")
-      } catch (error) {
-        console.error('Failed to load user', error)
-        setUserName("Leitor")
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        setIsAuthenticated(false);
+      } else {
+        setIsAuthenticated(true);
+        const userEmail = await AsyncStorage.getItem("userEmail");
+        try {
+          const user = await userService.getUserByEmail(userEmail!);
+          setUserName(user?.name || "Leitor");
+        } catch {
+          setUserName("Leitor");
+        }
       }
     };
-
     // Mock inicial (substituirá futuramente pela API)
     setCurrentReadings([
       { id: "1", title: "O Hobbit", progress: "45%" },
@@ -35,8 +36,11 @@ export default function HomeScreen() {
       { id: "2", book: "Dom Casmurro", rating: 4 },
     ]);
 
-    loadUserData();
+    checkAuth();
   }, []);
+
+  //if (isAuthenticated === null) return null;
+  //if (!isAuthenticated) return <Redirect href="/login" />;
 
   return (
     <View style={styles.container}>
