@@ -39,17 +39,17 @@ export default function BooksScreen() {
     },
   ];
 
-  const renderBook = ({ item }: {item: Book}) => {
-          return (<View>
-                <ThemedText>{item.title}</ThemedText>
-                <TouchableOpacity onPress={() => setSelectedPdf(item.linkPdf)}>
-                  <Image
-                    source={item.cover}
-                    style={{ height: 200, aspectRatio: 0.75, alignSelf: "center" }}
-                  />
-                </TouchableOpacity>
-              </View>
-            )
+  const renderBook = ({ item }: { item: Book }) => {
+    return (<View>
+      <ThemedText>{item.title}</ThemedText>
+      <TouchableOpacity onPress={() => setSelectedPdf(item.linkPdf)}>
+        <Image
+          source={item.cover}
+          style={{ height: 200, aspectRatio: 0.75, alignSelf: "center" }}
+        />
+      </TouchableOpacity>
+    </View>
+    )
   }
 
   return (
@@ -80,11 +80,11 @@ export default function BooksScreen() {
             style={styles.closeButton}
             onPress={() => setSelectedPdf(null)}
           >
-            <Text style={{color: "white"}}>X</Text>
+            <Text style={{ color: "white" }}>X</Text>
           </TouchableOpacity>
           {selectedPdf && (
             <WebView
-              source={{uri: selectedPdf}}
+              source={{ uri: selectedPdf }}
               style={{ flex: 1 }}
               javaScriptEnabled
               domStorageEnabled
