@@ -11,7 +11,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("userToken");
       if (!token) {
         setIsAuthenticated(false);
       } else {
@@ -20,11 +20,15 @@ export default function HomeScreen() {
         try {
           const user = await userService.getUserByEmail(userEmail!);
           setUserName(user?.name || "Leitor");
+          if (user?.role !== "ROLE_ADMIN") {
+            setUserName(user?.name.concat("⭐"))
+          }
         } catch {
           setUserName("Leitor");
         }
       }
     };
+
     // Mock inicial (substituirá futuramente pela API)
     setCurrentReadings([
       { id: "1", title: "O Hobbit", progress: "45%" },
@@ -37,7 +41,7 @@ export default function HomeScreen() {
     ]);
 
     checkAuth();
-  }, []);
+  }, [userName]);
 
   //if (isAuthenticated === null) return null;
   //if (!isAuthenticated) return <Redirect href="/login" />;

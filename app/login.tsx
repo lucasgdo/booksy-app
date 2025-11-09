@@ -43,7 +43,7 @@ export default function LoginScreen() {
 
     return (
         <ImageBackground
-            source={{ uri: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80' }}
+            source={require("@/assets/images/backgroundImage.avif")}
             style={styles.background}
             resizeMode="cover"
             blurRadius={3}
