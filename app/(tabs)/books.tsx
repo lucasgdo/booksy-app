@@ -1,7 +1,9 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Fonts } from "@/constants/theme";
+import { Author } from "@/entitites/Author";
 import { Book } from "@/entitites/Book";
+import { authorService } from "@/services/authorService";
 import { bookService } from "@/services/bookService";
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
@@ -18,6 +20,9 @@ import { WebView } from "react-native-webview";
 export default function BooksScreen() {
   const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
   const [bookList, setBookList] = useState<Book[]>([]);
+  const [authorList, setAuthorList] = useState<Author[]>([]);
+
+
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -28,7 +33,15 @@ export default function BooksScreen() {
         console.error("Erro ao buscar livros:", error);
       }
     };
-
+    const fetchAuthors = async () => {
+      try {
+        const data = await authorService.findAll();
+        setAuthorList(data);
+      } catch (error) {
+        console.error("Erro ao buscar livros:", error);
+      }
+    };
+    fetchAuthors();
     fetchBooks();
   }, []);
 
@@ -39,12 +52,18 @@ export default function BooksScreen() {
       >
         <Image
           source={{ uri: item.cover }}
-          style={{ height: 200, aspectRatio: 0.75, alignSelf: "center" }}
+          style={styles.bookCover}
         />
       </TouchableOpacity>
       <ThemedText style={styles.bookTitle}>{item.title}</ThemedText>
     </View>
   );
+
+  // const renderAuthor = ({ item }: { item: Author }) => (
+  //   <View style={styles.bookCard}>
+  //     <ThemedText style={styles.bookTitle}>{item.firstName} {item.lastName}</ThemedText>
+  //   </View>
+  // );
 
   return (
     <ThemedView style={styles.content}>
@@ -60,6 +79,13 @@ export default function BooksScreen() {
         renderItem={renderBook}
         contentContainerStyle={{ paddingBottom: 40 }}
       />
+
+      {/* <FlatList
+        data={authorList}
+        keyExtractor={(item) => item.id}
+        renderItem={renderAuthor}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      /> */}
 
       <Modal
         visible={!!selectedPdf}
@@ -90,6 +116,7 @@ export default function BooksScreen() {
 
 const styles = StyleSheet.create({
   bookCard: {
+    flexDirection: 'row',
     backgroundColor: "#fff",
     borderRadius: 16,
     paddingVertical: 16,
@@ -104,11 +131,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   bookTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 18,
+    fontWeight: "bold",
     color: "#333",
     textAlign: "center",
     marginTop: 8,
+  },
+  bookCover: {
+    height: 120,
+    aspectRatio: 0.75,
+    alignSelf: "center",
+    marginRight: 20,
+    borderRadius: 16,
   },
   titleContainer: {
     flexDirection: "row",

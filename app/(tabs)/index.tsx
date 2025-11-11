@@ -1,3 +1,5 @@
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
 import { userService } from "@/services/userService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
@@ -20,7 +22,7 @@ export default function HomeScreen() {
         try {
           const user = await userService.getUserByEmail(userEmail!);
           setUserName(user?.name || "Leitor");
-          if (user?.role !== "ROLE_ADMIN") {
+          if (user?.role === "ROLE_ADMIN") {
             setUserName(user?.name.concat("⭐"))
           }
         } catch {
@@ -47,11 +49,11 @@ export default function HomeScreen() {
   //if (!isAuthenticated) return <Redirect href="/login" />;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.greeting}>Bem-vindo, {userName?.split(' ')[0]}</Text>
+    <ThemedView style={styles.content}>
+      <ThemedText style={styles.greeting}>Bem-vindo, {userName?.split(' ')[0]}</ThemedText>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Leituras em progresso:</Text>
+        <ThemedText style={styles.sectionTitle}>Leituras em progresso:</ThemedText>
 
         <FlatList
           data={currentReadings}
@@ -68,7 +70,7 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Últimas análises:</Text>
+        <ThemedText style={styles.sectionTitle}>Últimas análises:</ThemedText>
 
         {reviews.length > 0 ? (
           reviews.map((review) => (
@@ -81,21 +83,22 @@ export default function HomeScreen() {
           <Text style={styles.emptyText}>Nenhuma review ainda</Text>
         )}
       </View>
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  content: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
-    paddingHorizontal: 20,
+    paddingLeft: 32,
+    paddingRight: 32,
     paddingTop: 60,
+    gap: 16,
+    overflow: "hidden",
   },
   greeting: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#1E293B",
     marginBottom: 24,
   },
   section: {
@@ -104,7 +107,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#334155",
     marginBottom: 12,
   },
   card: {
