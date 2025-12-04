@@ -1,3 +1,6 @@
+import {Author} from "@/entitites/Author";
+import {Category} from "@/entitites/Category";
+
 export interface Book {
   id: string;
   title: string;
@@ -5,7 +8,7 @@ export interface Book {
   viewLink: string;
   pagesNumber: number;
   releaseDate: number;
-  author: string | null;
-  categories: string[];
-  cover: string
+  author: Author;
+  categories: Category[];
+  cover: string;
 }
