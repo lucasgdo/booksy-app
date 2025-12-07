@@ -1,13 +1,12 @@
-import {View, Text, ScrollView, TextInput, TouchableOpacity, FlatList, Image} from "react-native";
-import {MaterialCommunityIcons} from "@expo/vector-icons";
-import {bookService} from "@/services/bookService";
-import {Link, useRouter} from "expo-router";
 import useFetch from "@/hooks/use-fetch";
-import {categoryService} from "@/services/categoryService";
+import { bookService } from "@/services/bookService";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Link, useRouter } from "expo-router";
+import { FlatList, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 const HomeScreen = () => {
     // const {data: categoryList} = useFetch(() => categoryService.listCategories());
-    const {data: bookList} = useFetch(() => bookService.listBooks());
+    const { data: bookList } = useFetch(() => bookService.listBooks());
     const router = useRouter();
 
     return (
@@ -44,22 +43,24 @@ const HomeScreen = () => {
                     data={bookList}
                     numColumns={2}
                     keyExtractor={(item) => item.id}
-                    columnWrapperStyle={{justifyContent: "space-between"}}
-                    contentContainerStyle={{paddingBottom: 60}}
-                    renderItem={({item}) => (
+                    columnWrapperStyle={{ justifyContent: "space-between" }}
+                    contentContainerStyle={{ paddingBottom: 60 }}
+                    renderItem={({ item }) => (
                         <Link href={`/books/${item.id}`} asChild>
                             <TouchableOpacity className="w-[48%] mb-6">
                                 <View className="w-full h-56 rounded-2xl overflow-hidden bg-gray-800 mb-2">
                                     <Image
-                                        source={{uri: item.cover}}
+                                        source={{ uri: item.cover }}
                                         className="w-full h-full"
                                         resizeMode="cover"
                                     />
                                 </View>
                                 <Text className="mt-1 text-lg font-semibold text-white"
-                                      numberOfLines={1}>{item.title}</Text>
-                                <Text
-                                    className="text-gray-400 text-sm">{`${item.author.firstName} ${item.author.lastName}`}</Text>
+                                    numberOfLines={1}>{item.title}
+                                </Text>
+                                {/* <Text
+                                    className="text-gray-400 text-sm">{`${item.author.firstName} ${item.author.lastName}`}
+                                </Text> */}
                             </TouchableOpacity>
                         </Link>
                     )}
@@ -70,7 +71,7 @@ const HomeScreen = () => {
                 activeOpacity={0.8}
                 onPress={() => router.push('/add-book')}
             >
-                <MaterialCommunityIcons name="plus" size={28} color="#0A1A1F"/>
+                <MaterialCommunityIcons name="plus" size={28} color="#0A1A1F" />
             </TouchableOpacity>
         </View>
     );
