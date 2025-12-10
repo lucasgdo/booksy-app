@@ -1,15 +1,38 @@
-import {View, Text, ScrollView, TouchableOpacity, Image, Modal} from 'react-native'
+import {View, Text, ScrollView, TouchableOpacity, Image, Modal, Alert, ActivityIndicator} from 'react-native'
 import React, {useState} from 'react'
 import {router, useLocalSearchParams} from "expo-router";
 import useFetch from "@/hooks/use-fetch";
 import {bookService} from "@/services/bookService";
 import {Feather} from "@expo/vector-icons";
 import {WebView} from "react-native-webview";
+import * as DocumentPicker from "expo-document-picker";
 
 const BookDetailsScreen = () => {
     const {id} = useLocalSearchParams();
     const {data: book} = useFetch(() => bookService.getBook(id as string));
     const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
+    const [uploading, setUploading] = useState(false);
+
+    const handleUpload = async () => {
+        if (!id) return;
+        try {
+            const result = await DocumentPicker.getDocumentAsync({ type: "application/pdf"});
+            if(result.canceled) return;
+            const asset = result.assets[0];
+            const file = {
+                uri: asset.uri,
+                name: asset.name,
+                type: asset.mimeType ?? "application/pdf"
+            }
+            setUploading(true);
+            await bookService.uploadBookFile(id as string, file);
+            setUploading(false);
+            Alert.alert("Sucesso", "Arquivo PDF enviado com sucesso!");
+        } catch (error) {
+            setUploading(false);
+            Alert.alert("Erro", `Falha ao enviar o arquivo PDF: ${(error as Error).message}`);
+        }
+    }
 
     return (
         <ScrollView className="flex-1 bg-[#0A1A1F] px-4 pt-10">
@@ -62,6 +85,17 @@ const BookDetailsScreen = () => {
                     onPress={() => setSelectedPdf(book?.viewLink!)}
                 >
                     <Text className="text-[#0A1A1F] text-center font-bold text-lg">Ler Livro</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    className="flex-1 ml-3 bg-[#FFFF00] py-3 rounded-xl"
+                    onPress={handleUpload}
+                    disabled={uploading}
+                >
+                    {uploading ? (
+                        <ActivityIndicator color="#0A1A1F" />
+                    ): (
+                        <Text className="text-[#0A1A1F] text-center font-bold text-lg">Adicionar PDF</Text>
+                    )}
                 </TouchableOpacity>
             </View>
             {/* BookReader */}

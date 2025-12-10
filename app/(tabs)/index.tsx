@@ -3,15 +3,23 @@ import { bookService } from "@/services/bookService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { FlatList, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {useState} from "react";
 
 const HomeScreen = () => {
     // const {data: categoryList} = useFetch(() => categoryService.listCategories());
-    const { data: bookList } = useFetch(() => bookService.listBooks());
+    const { data: bookList, refetch } = useFetch(() => bookService.listBooks());
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const router = useRouter();
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        await refetch();
+        setIsRefreshing(false);
+    }
 
     return (
         <View className="flex-1 bg-[#0A1A1F] px-4 pt-12">
-            <ScrollView showsVerticalScrollIndicator={false}>
+            {/*<ScrollView showsVerticalScrollIndicator={false}>*/}
                 {/* Header */}
                 <Text className="text-3xl font-bold text-center mb-6 text-white">Livros</Text>
                 {/* SearchBar */}
@@ -39,12 +47,13 @@ const HomeScreen = () => {
                 {/*/>*/}
                 {/* BookList */}
                 <FlatList
-                    scrollEnabled={false}
-                    data={bookList}
+                    data={bookList || []}
                     numColumns={2}
                     keyExtractor={(item) => item.id}
                     columnWrapperStyle={{ justifyContent: "space-between" }}
                     contentContainerStyle={{ paddingBottom: 60 }}
+                    onRefresh={handleRefresh}
+                    refreshing={isRefreshing}
                     renderItem={({ item }) => (
                         <Link href={`/books/${item.id}`} asChild>
                             <TouchableOpacity className="w-[48%] mb-6">
@@ -65,7 +74,7 @@ const HomeScreen = () => {
                         </Link>
                     )}
                 />
-            </ScrollView>
+            {/*</ScrollView>*/}
             <TouchableOpacity
                 className="absolute bottom-6 right-6 w-14 h-14 bg-[#2AD2C9] rounded-full justify-center items-center shadow-lg z-50"
                 activeOpacity={0.8}

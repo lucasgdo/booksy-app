@@ -1,17 +1,23 @@
 import {View, Text, FlatList, TouchableOpacity, Image, ScrollView} from 'react-native'
-import React from 'react'
+import {useState} from 'react'
 import useFetch from "@/hooks/use-fetch";
 import {readingService} from "@/services/readingService";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {useRouter} from "expo-router";
 
 const ReadingsScreen = () => {
-    const {data: readingsList} = useFetch(() => readingService.listReadings());
+    const {data: readingsList, refetch} = useFetch(() => readingService.listReadings());
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const router = useRouter();
 
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        await refetch();
+        setIsRefreshing(false);
+    }
+
     return (
-        <View className="flex-1 bg-[#0A1A1F]">
-            <ScrollView className="flex-1 pt-12 px-5">
+        <View className="flex-1 bg-[#0A1A1F] pt-12 px-5">
                 {/* Header */}
                 <View className="flex-row justify-center items-center mb-8">
                     <Text className="text-white text-3xl font-bold">Leituras</Text>
@@ -20,8 +26,9 @@ const ReadingsScreen = () => {
                 <FlatList
                     data={readingsList}
                     keyExtractor={(item) => item.id?.toString()}
-                    scrollEnabled={false}
                     contentContainerStyle={{paddingBottom: 100}}
+                    refreshing={isRefreshing}
+                    onRefresh={handleRefresh}
                     renderItem={({item}) => {
                         const progressPercent = Math.round((item.currentPage / item.book.pagesNumber) * 100);
                         const authorName = item.book?.author
@@ -52,15 +59,14 @@ const ReadingsScreen = () => {
                                 <Text className="text-gray-400 text-xs text-right mb-4">{progressPercent}%
                                     concluído</Text>
                                 {/* Action Button */}
-                                <TouchableOpacity
-                                    className="w-full bg-[#2AD2C9] py-3 rounded-xl items-center justify-center">
-                                    <Text className="text-[#0A1A1F] font-bold text-base">Editar</Text>
-                                </TouchableOpacity>
+                                {/*<TouchableOpacity*/}
+                                {/*    className="w-full bg-[#2AD2C9] py-3 rounded-xl items-center justify-center">*/}
+                                {/*    <Text className="text-[#0A1A1F] font-bold text-base">Editar</Text>*/}
+                                {/*</TouchableOpacity>*/}
                             </View>
                         );
                     }}
                 />
-            </ScrollView>
             {/* Floating Action Button - Placed outside ScrollView */}
             <TouchableOpacity
                 className="absolute bottom-6 right-6 w-14 h-14 bg-[#2AD2C9] rounded-full justify-center items-center shadow-lg z-50"

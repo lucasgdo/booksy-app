@@ -27,5 +27,24 @@ export const bookService = {
     async createBook(bookData: CreateBookDto): Promise<Book> {
         const response = await api.post("/books", bookData);
         return response.data;
+    },
+
+    async uploadBookFile(
+        id: string,
+        file: { uri: string; name: string; type: string },
+    ): Promise<string> {
+        const formData = new FormData();
+        formData.append("file", {
+            uri: file.uri,
+            name: file.name,
+            type: file.type,
+        } as any);
+
+        const response = await api.patch(`/books/${id}/upload`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
     }
 };

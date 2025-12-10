@@ -55,9 +55,9 @@ const ReviewsScreen = () => {
                                         </Text>
                                     </View>
 
-                                    <TouchableOpacity>
-                                        <MaterialCommunityIcons name="dots-vertical" size={20} color="#9CA3AF" />
-                                    </TouchableOpacity>
+                                    {/*<TouchableOpacity>*/}
+                                    {/*    <MaterialCommunityIcons name="dots-vertical" size={20} color="#9CA3AF" />*/}
+                                    {/*</TouchableOpacity>*/}
                                 </View>
 
                                 {/* Stars */}

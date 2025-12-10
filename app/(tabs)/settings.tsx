@@ -1,21 +1,46 @@
-import useFetch from '@/hooks/use-fetch';
-import { userService } from '@/services/userService';
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {userService} from '@/services/userService';
+import {MaterialCommunityIcons} from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import React, { useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import {useRouter} from "expo-router";
+import React, {useEffect, useState} from 'react';
+import {ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {UserResponse} from "@/entitites/User";
 
 const SettingsScreen = () => {
     const router = useRouter();
-    const [isSyncEnabled, setIsSyncEnabled] = useState(true);
+    const [userId, setUserId] = useState("");
+    const [user, setUser] = useState<UserResponse | null>(null);
 
-    const { data: user } = useFetch(async () => {
-        const userId = await AsyncStorage.getItem('userId');
-        if (!userId) return null;
-        const response = await userService.getUserByEmail(userId);
-        return response;
-    });
+    useEffect(() => {
+        AsyncStorage.getItem("userToken").then((token) => {
+            if (token) {
+                const parts = token.split('.');
+                const payloadEncoded = parts[1];
+                const payloadDecoded = JSON.parse(atob(payloadEncoded));
+                setUserId(payloadDecoded.sub);
+            }
+        });
+
+    }, []);
+
+    useEffect(() => {
+        if (!userId) return;
+
+        let mounted = true;
+
+        const fetchUser = async () => {
+            try {
+                const fetched = await userService.getUserById(userId);
+                if (mounted) setUser(fetched);
+            } catch (e) {
+                console.warn("Failed to fetch user: ", e);
+            }
+        };
+
+        fetchUser().then();
+
+        return () => { mounted = false };
+    }, [userId]);
 
     const handleLogout = async () => {
         await AsyncStorage.removeItem("userToken");
