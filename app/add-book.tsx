@@ -7,7 +7,6 @@ import { authorService } from "@/services/authorService";
 import { Author } from "@/entitites/Author";
 import { bookService, CreateBookDto } from "@/services/bookService";
 import * as ImagePicker from 'expo-image-picker';
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const InputField = ({ label, placeholder, multiline = false, value, onChangeText, keyboardType = 'default' }: any) => (
     <View className="mb-4">
